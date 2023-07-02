@@ -1,4 +1,5 @@
 import datetime
+import pathlib
 import re
 
 import numpy as np
@@ -6,6 +7,7 @@ import numpy as np
 from local_scraper import ImprovedRightmoveData
 from pymongo import MongoClient
 import logging as log
+from rightmove.emailer import send_email
 from rightmove.utils import setup_logging
 
 log.basicConfig(format='%(levelname)s:%(message)s', level=log.INFO)
@@ -16,7 +18,7 @@ url = 'https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifie
 
 def get_database():
     # Provide the mongodb atlas url to connect python to mongodb using pymongo
-    CONNECTION_STRING = "mongodb+srv://user_002:8yd7XXHf2BQ7IIus@cluster0.ihkzp.mongodb.net/?retryWrites=true&w=majority"
+    CONNECTION_STRING = "mongodb+srv://user_002:uHQ87BEhFy7ZUmTj@cluster0.ihkzp.mongodb.net/?retryWrites=true&w=majority"
 
     # Create a connection using MongoClient. You can import MongoClient or use pymongo.MongoClient
     client = MongoClient(CONNECTION_STRING)
@@ -31,37 +33,24 @@ def web_to_mongo():
 
     rm = ImprovedRightmoveData(url)
 
-    df = rm.get_results
-    df['price_type'] = df['price_type'].apply(lambda x: str(x).strip() if x else x)
-    df['_id'] = df['url'].apply(lambda x: re.search("http://www\.rightmove\.co\.uk/properties/(.+?)#", x).group(1))
-
-    df = df.drop_duplicates(subset='_id', keep='last')
-    # df.groupby('_id')
-    # dropid = df.loc[
-    #     df.duplicated(subset=['_id', 'timestamp']),
-    #     'userid'
-    # ].unique()
-
-    # re.search("http://www\.rightmove\.co\.uk/properties/(.+?)#", "http://www.rightmove.co.uk/properties/123814832#/?channel=RES_BUY").group(1)
-    df = df.replace({np.nan: None})
-    from_web = df.to_dict('records')
-    # db.listings.insert_many()
+    from_web = rm.get_results
 
     cursor = db.listings.find({})
-    db_entries  = list(cursor)
-    #log.info(f"DB ENTRIES { [x for x in d if  x['_id'] == '128729528']}")
-    log.info(f"web ENTRIES { [x for x in from_web if  x['_id'] == '128729528']}")
-
-    from_web = df.to_dict('records')
+    db_entries = list(cursor)
+    # log.info(f"DB ENTRIES { [x for x in d if  x['_id'] == '128729528']}")
+    log.info(f"web ENTRIES {[x for x in from_web if x['_id'] == '128729528']}")
 
     to_be_updated = []
+    full_updates = []
     to_be_inserted = []
     for webentry in from_web:
         dbentry = next(iter([x for x in db_entries if webentry['_id'] == x['_id']]), None)
         if dbentry:
             merged = merged_result(webentry, dbentry)
             if merged:
-                to_be_updated.append(merged)
+                full_doc, changes_doc = merged
+                to_be_updated.append(changes_doc)
+                full_updates.append(full_doc)
         else:
             to_be_inserted.append(webentry)
 
@@ -73,7 +62,16 @@ def web_to_mongo():
         log.info(f"Inserting {len(to_be_inserted)} records")
         db.listings.insert_many(to_be_inserted)
 
+    base_out = pathlib.Path('C:/Users/steph/rightmove')
+    out_path = base_out / datetime.datetime.today().strftime('%Y%m%d')
+    out_path.mkdir(parents=True, exist_ok=True)
+    out_path = out_path / 'run-changes.txt'
+    with open(out_path, 'w') as f:
+        f.write(f"Changes: \n\n {str(to_be_updated)}")
+        f.write(f"\n\nNew: \n\n {str(to_be_inserted)}")
+
     log.info("DONE")
+    send_email(inserted_props=to_be_inserted, updated_props=full_updates)
     # rm.get_results.to_csv("C:/Users/steph/temp/dat.csv", index=False)
 
 
@@ -81,34 +79,51 @@ def merged_result(new_doc, db_doc):
     def value_or_na(mp, field):
         return mp[field] if field in mp and mp[field] is not None else "EMPTY"
 
+    def is_status_change(field):
+        db_v = value_or_na(db_doc, field).split(' ')[0]
+        new_v = value_or_na(new_doc, field).split(' ')[0]
+        if db_v != new_v:
+            log.info(f"field {field} changed from {db_v} to {new_v}")
+            return True
+        return False
+
     def is_change(field):
-        if new_doc[field] != db_doc[field]:
+        if value_or_na(db_doc, field) != value_or_na(new_doc, field):
             log.debug(f"field {field} changed from {value_or_na(db_doc, field)} to {value_or_na(new_doc, field)}")
-            return f"Field {field} changed from {value_or_na(db_doc, field)} to {value_or_na(new_doc, field)}"
+            # return f"Field {field} changed from {value_or_na(db_doc, field)} to {value_or_na(new_doc, field)}"
+            return True
+        return False
+
     update = {}
-    changed_fields = []
+    audits = db_doc['audit_history'] if 'audit_history' in db_doc else []
+    audit = {}
     for f in ["price", "price_type", "type", "address", "url", "agent_url", "added_or_reduced_on", "status"]:
-        changed_msg = is_change(f)
-
-        if changed_msg:
-
+        if f == 'status' and is_status_change(f):
+            audit[f] = {'old': value_or_na(db_doc, f), 'new': value_or_na(new_doc, f)}
             update[f] = value_or_na(new_doc, f)
-            changed_fields.append(changed_msg)
+        elif is_change(f):
+            audit[f] = {'old': value_or_na(db_doc, f), 'new': value_or_na(new_doc, f)}
+            update[f] = value_or_na(new_doc, f)
 
-    if changed_fields:
-        changed_fields.append(f"Changes on {datetime.datetime.now()}")
+    if update:
+        audit['on'] = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+        audits.append(audit)
+        update['audit_history'] = audits
 
-        changes_msg = ", ".join(changed_fields)
-
-        msg_ = db_doc['changes'] + [changes_msg] if 'changes' in db_doc and db_doc['changes'] is not None else [
-            changes_msg]
-        log.info(f"Change message for {db_doc['_id']} is {msg_}")
-        update['changes'] = msg_
+        log.info(f"Changes for {db_doc['_id']} is {audit}")
         update['_id'] = db_doc['_id']
         log.info(f"changes obj: {update}")
-        return update
+        db_doc['audit_history'] = audits
+        return db_doc, update
     else:
         return None
 
+def email_tester():
+    rm = ImprovedRightmoveData(url)
+
+    from_web = rm.get_results
+    send_email(inserted_props=from_web, updated_props=[])
+
 if __name__ == '__main__':
     web_to_mongo()
+    #email_tester()
