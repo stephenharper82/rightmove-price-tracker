@@ -1,8 +1,10 @@
-from pymongo import MongoClient
 import logging as log
-from contextlib import contextmanager
-from dotenv import load_dotenv
 import os
+from contextlib import contextmanager
+
+from dotenv import load_dotenv
+from pymongo import MongoClient
+
 load_dotenv()
 
 # TODO: Store list of tracked collections in MongoDB alongside TRACKER_URLs
@@ -23,7 +25,7 @@ def mongo_client():
     with client.start_session() as session:
         try:
             session.start_transaction()
-            yield collection
+            yield session, collection
             session.commit_transaction()
         except Exception as e:
             session.abort_transaction()

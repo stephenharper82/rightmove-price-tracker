@@ -1,18 +1,15 @@
 import logging as log
+import os
+
+from dotenv import load_dotenv
 
 from lib.rightmove.processor import UrlProcessor
-from dotenv import load_dotenv
-import os
+
 load_dotenv()
 log.basicConfig(format='%(levelname)s:%(message)s', level=log.INFO)
 
 # TODO: Store list of tracked URLS in mongodb
 TRACKER_URL = os.getenv('TRACKER_URL')
-
-
-
-# TODO Should store URLs being tracked in DB, and iterate over them. Means storing an ID related to the search against each listings collection too
-URL = 'https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E68042&minBedrooms=4&maxPrice=650000&minPrice=375000&radius=15.0&propertyTypes=bungalow%2Cdetached%2Csemi-detached%2Cterraced&includeSSTC=true&mustHave=garden%2Cparking&dontShow=&furnishTypes=&keywords='
 
 
 def do_work():

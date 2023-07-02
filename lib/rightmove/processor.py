@@ -1,7 +1,6 @@
 import datetime
 import json
 import logging as log
-from typing import Any, Dict
 
 import utils
 from lib.rightmove.emailer import send_email
@@ -56,7 +55,7 @@ class UrlProcessor:
         # log.info(f"DB ENTRIES { [x for x in d if  x['_id'] == '128729528']}")
         # TODO : session
         #  https://stackoverflow.com/questions/59264158/provide-contextvars-context-with-a-contextmanager
-        with mongo_client() as listings:
+        with mongo_client() as (session, listings):
             db_entries = self.get_listings(listings)
 
             db_changes = []
@@ -75,11 +74,11 @@ class UrlProcessor:
 
             log.info(f"Updating {len(db_changes)} records")
             for rec in db_changes:
-                listings.update_one({'_id': rec['_id']}, {"$set": rec})
+                listings.update_one({'_id': rec['_id']}, {"$set": rec}, session=session)
 
             log.info(f"Inserting {len(to_be_inserted)} records")
             if to_be_inserted:
-                listings.insert_many(to_be_inserted)
+                listings.insert_many(to_be_inserted, session=session)
 
             file_contents = [f"Changes: \n\n {json.dumps(db_changes, indent=4)}",
                              f"\n\nNew: \n\n {json.dumps(to_be_inserted, indent=4)} \n\n\n FOR EMAIL\n\n {json.dumps(full_changes, indent=4)}"]
@@ -87,7 +86,6 @@ class UrlProcessor:
 
             log.info("Finished updating DB... Now sending email...")
             send_email(inserted_props=to_be_inserted, updated_props=full_changes)
-            # rm.get_results.to_csv("C:/Users/steph/temp/dat.csv", index=False)
             log.info("...Finished processing URL")
 
     def _find_db_entry(self, db_entries, webentry):
