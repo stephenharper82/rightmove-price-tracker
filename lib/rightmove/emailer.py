@@ -1,16 +1,18 @@
-import pathlib
-import re
-import logging as log
-from yagmail import oauth2
-import yagmail
-import arrow
-from jinja2 import Template
+import logging
 import os
-import utils
-from dotenv import load_dotenv
+import re
 import tempfile
 
+import arrow
+import yagmail
+from dotenv import load_dotenv
+from jinja2 import Template
+from yagmail import oauth2
+
+import utils
+
 load_dotenv()
+log = logging.getLogger('tracker')
 
 APP_GMAIL_ACCOUNT = os.getenv('APP_GMAIL_ACCOUNT')
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')

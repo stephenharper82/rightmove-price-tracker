@@ -1,9 +1,11 @@
-import logging as log
+import logging
 import os
 from contextlib import contextmanager
 
 from dotenv import load_dotenv
 from pymongo import MongoClient
+
+log = logging.getLogger('tracker')
 
 load_dotenv()
 

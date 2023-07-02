@@ -1,5 +1,5 @@
 
-import logging as log
+import logging
 import sys
 import tempfile
 from typing import Any
@@ -7,10 +7,10 @@ from typing import Any
 
 def setup_logging():
     # TODO: Either get this to work or remove.
-    logFormatter = log.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
-    rootLogger = log.getLogger()
+    logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+    rootLogger = logging.getLogger()
 
-    consoleHandler = log.StreamHandler(sys.stdout)
+    consoleHandler = logging.StreamHandler(sys.stdout)
     consoleHandler.setFormatter(logFormatter)
     rootLogger.addHandler(consoleHandler)
 

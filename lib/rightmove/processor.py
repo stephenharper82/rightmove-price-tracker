@@ -1,11 +1,13 @@
 import datetime
 import json
-import logging as log
+import logging
 
 import utils
 from lib.rightmove.emailer import send_email
 from lib.rightmove.local_scraper import ImprovedRightmoveData
 from lib.rightmove.rightmove_dao import mongo_client
+
+log = logging.getLogger('tracker')
 
 
 class UrlProcessor:
@@ -46,7 +48,7 @@ class UrlProcessor:
         return db_entries
 
     def process_url(self, url: str):
-
+        log.info(f'Processing URL: {url}')
         rm = ImprovedRightmoveData(url)
 
         from_web = rm.get_results

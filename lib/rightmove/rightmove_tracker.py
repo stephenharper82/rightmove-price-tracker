@@ -1,12 +1,16 @@
-import logging as log
+import logging
 import os
+import sys
 
 from dotenv import load_dotenv
 
 from lib.rightmove.processor import UrlProcessor
 
 load_dotenv()
-log.basicConfig(format='%(levelname)s:%(message)s', level=log.INFO)
+
+logging.basicConfig(stream=sys.stdout, format='%(levelname)s:%(message)s')
+log = logging.getLogger('tracker')
+log.setLevel(logging.INFO)
 
 # TODO: Store list of tracked URLS in mongodb
 TRACKER_URL = os.getenv('TRACKER_URL')
