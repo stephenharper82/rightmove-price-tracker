@@ -1,0 +1,71 @@
+[
+  {
+    "_id": 125212145,
+    "price": 650000,
+    "price_type": "Offers Over",
+    "type": "4 bedroom semi-detached house for sale",
+    "address": "Drymen Road, Bearsden, Glasgow",
+    "url": "/properties/125212145#/?channel=RES_BUY",
+    "agent_url": "/property-for-sale/contactBranch.html?propertyId=125212145",
+    "added_or_reduced_on": "Added on 21/07/2022",
+    "bedrooms": 4,
+    "bathrooms": 3,
+    "image": "https://media.rightmove.co.uk:443/dir/crop/10:9-16:9/56k/55557/125212145/55557_BXL220448_IMG_00_0000_max_296x197.jpeg",
+    "propertySubType": "Semi-Detached",
+    "status": "Sold STC",
+    "audit_history": [
+      {
+        "price": {
+          "old": 100,
+          "new": 200
+        },
+        "on": "2022-01-01T22:00:01.000Z"
+      }
+    ]
+  },
+  {
+    "_id": 125844770,
+    "price": 650000,
+    "price_type": "Offers Over",
+    "type": "4 bedroom detached villa for sale",
+    "address": "Lochbroom Drive, Newton Mearns",
+    "url": "/properties/125844770#/?channel=RES_BUY",
+    "agent_url": "/property-for-sale/contactBranch.html?propertyId=125844770",
+    "added_or_reduced_on": "Added on 08/08/2022",
+    "bedrooms": 4,
+    "bathrooms": 2,
+    "image": "https://media.rightmove.co.uk:443/dir/crop/10:9-16:9/56k/55395/125844770/55395_103806_IMG_00_0000_max_296x197.jpeg",
+    "propertySubType": "Detached Villa",
+    "status": "Sold STC"
+  },
+  {
+    "_id": 126830234,
+    "price": 650000,
+    "price_type": "Offers Over",
+    "type": "4 bedroom detached villa for sale",
+    "address": "Freeland House, Main Street, Bridge of Weir",
+    "url": "/properties/126830234#/?channel=RES_BUY",
+    "agent_url": "/property-for-sale/contactBranch.html?propertyId=126830234",
+    "added_or_reduced_on": "Added on 07/09/2022",
+    "bedrooms": 4,
+    "bathrooms": 3,
+    "image": "https://media.rightmove.co.uk:443/dir/crop/10:9-16:9/45k/44439/126830234/44439_BW2130_IMG_00_0001_max_296x197.jpeg",
+    "propertySubType": "Detached Villa",
+    "status": "Under offer"
+  },
+  {
+    "_id": 126505037,
+    "price": 650000,
+    "price_type": "Offers Over",
+    "type": "4 bedroom detached house for sale",
+    "address": "Milndavie Road, Strathblane, Glasgow, Stirlingshire",
+    "url": "/properties/126505037#/?channel=RES_BUY",
+    "agent_url": "/property-for-sale/contactBranch.html?propertyId=126505037",
+    "added_or_reduced_on": "Added on 29/08/2022",
+    "bedrooms": 4,
+    "bathrooms": 3,
+    "image": "https://media.rightmove.co.uk:443/dir/crop/10:9-16:9/56k/55557/126505037/55557_BXL220416_IMG_00_0000_max_296x197.jpeg",
+    "propertySubType": "Detached",
+    "status": "Under offer"
+  }
+]

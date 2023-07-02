@@ -1,0 +1,9 @@
+rightmove_webscraper
+yagmail
+pathlib
+arrow
+jinja2
+confuse
+pymongo
+python-dotenv
+
