@@ -3,6 +3,7 @@ import logging
 import sys
 import tempfile
 from typing import Any
+log = logging.getLogger('tracker')
 
 
 def setup_logging():
