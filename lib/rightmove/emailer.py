@@ -135,5 +135,5 @@ def refresh_google_refresh_token():
 
 
 if __name__ == '__main__':
-    # get_google_refresh_token()
-    _send_email_internal('test emailer', 'test')
+    refresh_google_refresh_token()
+    # _send_email_internal('test emailer', 'test')

@@ -19,17 +19,26 @@ log.info(f'Connecting using connection string: {DB_CONNECTION}, DB: {DB_NAME}, c
 
 @contextmanager
 def mongo_client():
-    client = MongoClient(DB_CONNECTION)
-    db = client[DB_NAME]
-    collection = db[DB_COLLECTION]
-    #collection = client.rightmove.listings
-    #collection = client.rightmove.test_listings
-    with client.start_session() as session:
-        try:
-            session.start_transaction()
-            yield session, collection
-            session.commit_transaction()
-        except Exception as e:
-            session.abort_transaction()
-            raise
+    try:
+        client = MongoClient(DB_CONNECTION)
+        db = client[DB_NAME]
+        collection = db[DB_COLLECTION]
+    except Exception as e:
+        logging.error("Failed to connect to MongoDB: %s", e)
+        raise
+
+    if client.is_primary:  # check if connection established
+        with client.start_session() as session:
+            try:
+                session.start_transaction()
+                yield session, collection
+                session.commit_transaction()
+            except Exception as e:
+                logging.error("Error occurred during the transaction: %s", e)
+                session.abort_transaction()
+                raise
+            finally:
+                client.close()  # ensure connection is closed
+    else:
+        raise ConnectionError("Failed to establish a primary connection")
 

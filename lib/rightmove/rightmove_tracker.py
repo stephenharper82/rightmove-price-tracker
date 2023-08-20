@@ -24,7 +24,8 @@ def do_work():
 def query_data():
     # TODO: Something useful with the data
     processor = UrlProcessor()
-    processor.query_data()
+    # processor.query_data()
+    processor.query_stats()
 
 #
 # def email_tester():
@@ -34,6 +35,6 @@ def query_data():
 #     send_email(inserted_props=from_web, updated_props=[])
 
 if __name__ == '__main__':
-    do_work()
-    #query_data()
+    # do_work()
+    query_data()
     # email_tester()
